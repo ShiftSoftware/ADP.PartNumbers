@@ -6,7 +6,7 @@
 		<Authors>Shift Software</Authors>
 		<AssemblyName>ShiftSoftware.ADP.PartNumbers</AssemblyName>
 		<PackageId>ShiftSoftware.ADP.PartNumbers</PackageId>
-		<Version>0.0.1</Version>
+		<Version>0.0.2</Version>
 		<IsPackable>True</IsPackable>
 		<PackageIcon>icon.png</PackageIcon>
 		<LangVersion>14</LangVersion>
