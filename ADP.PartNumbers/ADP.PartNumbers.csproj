@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>ShiftSoftware.ADP.PartNumbers</RootNamespace>
+		<Authors>Shift Software</Authors>
+		<AssemblyName>ShiftSoftware.ADP.PartNumbers</AssemblyName>
+		<PackageId>ShiftSoftware.ADP.PartNumbers</PackageId>
+		<Version>0.0.1</Version>
+		<IsPackable>True</IsPackable>
+		<PackageIcon>icon.png</PackageIcon>
+		<LangVersion>14</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Memory" Version="4.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Images\" />
+		<None Include="Images\icon.png" Pack="true" PackagePath="\" />
+		<Folder Include="Images\" />
+	</ItemGroup>
+</Project>

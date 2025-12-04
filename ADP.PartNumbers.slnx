@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ADP.PartNumbers.Tests/ADP.PartNumbers.Tests.csproj" />
+  <Project Path="ADP.PartNumbers/ADP.PartNumbers.csproj" />
+</Solution>
