@@ -11,11 +11,11 @@ public class ToyotaPartNumber
 
     private ToyotaPartNumber(ReadOnlySpan<char> partNumber)
     {
-        PartNumberCategory = partNumber.Slice(0, 5).ToString();
+        PartNumberCategory = partNumber.Length >=5 ? partNumber.Slice(0, 5).ToString() : string.Empty;
         VehicleUsageCode = partNumber.Length >= 10 ? partNumber.Slice(5, 5).ToString() : string.Empty;
         PartSuffix = partNumber.Length > 10 ? partNumber.Slice(10).ToString() : string.Empty;
 
-        this.partNumber = $"{this.PartNumberCategory}{this.VehicleUsageCode}{this.PartSuffix}";
+        this.partNumber = $"{this.PartNumberCategory}{this.VehicleUsageCode}{this.PartSuffix}".ToUpperInvariant();
     }
 
     /// <summary>
@@ -28,34 +28,42 @@ public class ToyotaPartNumber
         if (string.IsNullOrWhiteSpace(partNumber))
             return false;
 
-        if (removeNonAlphanumericCharacters)
+        // Check for trailing hyphen which suggests incomplete suffix
+        if (partNumber.Length > 0 && partNumber[partNumber.Length - 1] == '-')
+            return false;
+
+        Span<char> buffer = stackalloc char[partNumber.Length];
+        Span<char> cleanedBuffer = stackalloc char[partNumber.Length];
+
+        int index = 0;
+        var cleandedIndex = 0;
+
+        var containsInvalidCharacters = false;
+
+        foreach (var ch in partNumber)
         {
-            Span<char> buffer = stackalloc char[partNumber.Length];
-
-            int index = 0;
-
-            foreach (var ch in partNumber)
+            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '-')
             {
-                if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '-')
-                    buffer[index++] = ch;
-            }
+                buffer[index++] = ch; //Valid Character
 
-            partNumber = buffer.Slice(0, index).ToString();
+                if (ch != '-')
+                    cleanedBuffer[cleandedIndex++] = ch;
+            }
+            else
+            {
+                if (!removeNonAlphanumericCharacters)
+                {
+                    containsInvalidCharacters = true;
+                }
+            }
         }
 
-        var cleaned = RemoveHyphens(partNumber);
-
-        if (string.IsNullOrEmpty(cleaned))
+        if (containsInvalidCharacters)
             return false;
 
-        cleaned = cleaned.ToUpperInvariant();
+        result = new ToyotaPartNumber(cleanedBuffer.Slice(0, cleandedIndex));
 
-        if (!ToyotaPartNumberValidator.Validate(cleaned))
-            return false;
-
-        result = new ToyotaPartNumber(cleaned);
-
-        return true;
+        return result.PartNumberCategory.Length == 5 && result.VehicleUsageCode.Length == 5 && (result.PartSuffix.Length == 0 || result.PartSuffix.Length == 2);
     }
 
     private static string RemoveHyphens(ReadOnlySpan<char> input)

@@ -78,6 +78,8 @@ public class ToyotaPartNumberTests
         Assert.False(ToyotaPartNumber.TryParse("123456-12345", out _)); // Part Category is 6 characters
         Assert.False(ToyotaPartNumber.TryParse("12345-12345-1", out _)); // Suffix is 1 character
         Assert.False(ToyotaPartNumber.TryParse("12345-12345-123", out _)); // Suffix is 3 characters
+        
+        Assert.False(ToyotaPartNumber.TryParse("12345-12345-", out _)); // Suffix is implied to be there. But it's 0 characters
     }
 
 
@@ -85,7 +87,6 @@ public class ToyotaPartNumberTests
     public void ValidFormats()
     {
         Assert.True(ToyotaPartNumber.TryParse("90915-YZZJ3", out _));
-        Assert.True(ToyotaPartNumber.TryParse("90915-YZZJ3-", out _));
         Assert.True(ToyotaPartNumber.TryParse("90915YZZJ3", out _));
 
 
