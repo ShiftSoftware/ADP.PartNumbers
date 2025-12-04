@@ -13,7 +13,7 @@ steps:
 
  - checkout: self
 
- - script: dotnet build dotnet --configuration release
+ - script: dotnet build --configuration release
    displayName: 'Build All Projects'
 
  - script: dotnet test ADP.PartNumbers.Tests
