@@ -219,6 +219,15 @@ public class ToyotaPartNumberTests
 
             new ("12345-ABCDE-XY", "12345-ABCDE-XY", "12345ABCDEXY"),
             new ("12345-abcde-xy", "12345-ABCDE-XY", "12345ABCDEXY"),
+
+            new ("12345ABC'DE", "12345-ABCDE", "12345ABCDE"),
+            new ("12@345ABCDE", "12345-ABCDE", "12345ABCDE"),
+            new ("12345A#BCDE", "12345-ABCDE", "12345ABCDE"),
+            new ("12345ABC%DE", "12345-ABCDE", "12345ABCDE"),
+            new ("1&2345ABC%DE", "12345-ABCDE", "12345ABCDE"),
+
+            new ("12345-ABCDEوا", "12345-ABCDE", "12345ABCDE"),
+            new ("12345-ABCDEлт", "12345-ABCDE", "12345ABCDE"),
         };
 
         foreach (var item in dataSet)
@@ -228,7 +237,7 @@ public class ToyotaPartNumberTests
             ToyotaPartNumber part;
             bool partIsValid;
 
-            partIsValid = ToyotaPartNumber.TryParse(item.providedPartString, out part);
+            partIsValid = ToyotaPartNumber.TryParse(item.providedPartString, out part, true);
             
             Assert.True(partIsValid);
             
