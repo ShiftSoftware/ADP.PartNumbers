@@ -23,8 +23,10 @@ internal static class ToyotaPartNumberValidator
 
         var cleanedSpan = cleaned.Slice(0, cleanedLength);
 
-        // Toyota part numbers are typically 10-13 characters without hyphens
-        if (cleanedLength < 10 || cleanedLength > 13)
+        // Toyota part numbers must be exactly 10 or 12 characters without hyphens
+        // 10 chars: PartNumberCategory (5) + VehicleUsageCode (5)
+        // 12 chars: PartNumberCategory (5) + VehicleUsageCode (5) + PartSuffix (2)
+        if (cleanedLength != 10 && cleanedLength != 12)
             return false;
 
         // All characters must be alphanumeric

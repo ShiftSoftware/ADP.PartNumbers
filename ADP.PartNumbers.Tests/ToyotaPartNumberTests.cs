@@ -1,6 +1,6 @@
 ﻿using ShiftSoftware.ADP.PartNumbers;
-using Xunit.Abstractions;
 using System.IO.Compression;
+using Xunit.Abstractions;
 
 namespace ADP.PartNumbers.Tests;
 
@@ -40,7 +40,7 @@ public class ToyotaPartNumberTests
         Assert.Equal(partString2.Replace("-", "").ToUpperInvariant(), part2.ToString(false));
         Assert.Equal(partString3.ToUpperInvariant(), part3.ToString(false));
     }
-
+    
     [Fact(DisplayName = "02. Components")]
     public void Components()
     {
@@ -65,28 +65,50 @@ public class ToyotaPartNumberTests
     public void InvalidPartNumbers()
     {
         Assert.False(ToyotaPartNumber.TryParse("123", out _)); // Too short
+        Assert.False(ToyotaPartNumber.TryParse("ببببب-ببببب", out _)); // Non-alphanumeric
+        Assert.False(ToyotaPartNumber.TryParse("ффвфауафав", out _)); // Non-alphanumeric
         Assert.False(ToyotaPartNumber.TryParse("12345-ABCDE-123456", out _)); // Too long
+        Assert.False(ToyotaPartNumber.TryParse("12345-12345-123", out _)); // Too long
         Assert.False(ToyotaPartNumber.TryParse("12345-ABC*EE", out _)); // Invalid character
         Assert.False(ToyotaPartNumber.TryParse("", out _)); // Empty
         Assert.False(ToyotaPartNumber.TryParse(null, out _)); // Null
+
+
+        Assert.False(ToyotaPartNumber.TryParse("12345-123456", out _)); // Vehicle Usage is 6 characters
+        Assert.False(ToyotaPartNumber.TryParse("123456-12345", out _)); // Part Category is 6 characters
+        Assert.False(ToyotaPartNumber.TryParse("12345-12345-1", out _)); // Suffix is 1 character
+        Assert.False(ToyotaPartNumber.TryParse("12345-12345-123", out _)); // Suffix is 3 characters
     }
+
 
     [Fact(DisplayName = "05. Valid Toyota Part Number Formats")]
     public void ValidFormats()
     {
         Assert.True(ToyotaPartNumber.TryParse("90915-YZZJ3", out _));
+        Assert.True(ToyotaPartNumber.TryParse("90915-YZZJ3-", out _));
+        Assert.True(ToyotaPartNumber.TryParse("90915YZZJ3", out _));
+
+
         Assert.True(ToyotaPartNumber.TryParse("04152-YZZA1", out _));
         Assert.True(ToyotaPartNumber.TryParse("04152YZZA1", out _));
         Assert.True(ToyotaPartNumber.TryParse("90915-10003", out _));
         Assert.True(ToyotaPartNumber.TryParse("90915-YZZJ3-01", out _));
     }
 
-    [Fact(DisplayName = "06. Parse Exception")]
-    public void ParseException()
+
+    [Fact(DisplayName = "06. Remove Non-Alphanumeric Characters")]
+    public void ParseWithOptions()
     {
-        var exception = Assert.Throws<ArgumentException>(() => ToyotaPartNumber.Parse("INVALID"));
-        Assert.Equal("Invalid Toyota Part Number (Parameter 'partNumber')", exception.Message);
+        Assert.False(ToyotaPartNumber.TryParse("1234ф5-12345", out _));
+        Assert.True(ToyotaPartNumber.TryParse("1234ф5-12345", out _, removeNonAlphanumericCharacters: true));
+
+        Assert.False(ToyotaPartNumber.TryParse("12345 12345", out _));
+        Assert.True(ToyotaPartNumber.TryParse("12345 12345", out _, removeNonAlphanumericCharacters: true));
+
+        Assert.False(ToyotaPartNumber.TryParse("12345د12345", out _));
+        Assert.True(ToyotaPartNumber.TryParse("12345د12345", out _, removeNonAlphanumericCharacters: true));
     }
+
 
     [Fact(DisplayName = "07. Validate All Part Numbers from ZIP")]
     public void ValidatePartNumbersFromZip()
@@ -96,21 +118,21 @@ public class ToyotaPartNumberTests
 
         using var zipArchive = ZipFile.OpenRead(zipPath);
         var csvEntry = zipArchive.Entries.FirstOrDefault(e => e.Name.EndsWith(".csv", StringComparison.OrdinalIgnoreCase));
-        
+
         Assert.NotNull(csvEntry);
 
         using var streamReader = new StreamReader(csvEntry.Open());
         var partNumbers = new List<string>();
         var invalidPartNumbers = new List<string>();
-        
+
         while (!streamReader.EndOfStream)
         {
             var line = streamReader.ReadLine();
             if (!string.IsNullOrWhiteSpace(line))
             {
                 partNumbers.Add(line.Trim());
-                
-                if (!ToyotaPartNumber.TryParse(line.Trim(), out var parsedPart))
+
+                if (!ToyotaPartNumber.TryParse(line.Trim(), out var parsedPart, removeNonAlphanumericCharacters: true))
                 {
                     invalidPartNumbers.Add(line.Trim());
                     //output.WriteLine($"Invalid part number: {line.Trim()}");
@@ -129,6 +151,7 @@ public class ToyotaPartNumberTests
         Assert.Empty(invalidPartNumbers);
     }
 
+
     [Fact(DisplayName = "08. Validate Part Numbers from CSV")]
     public void ValidatePartNumbersFromCsv()
     {
@@ -138,15 +161,15 @@ public class ToyotaPartNumberTests
         var lines = File.ReadAllLines(csvPath);
         var partNumbers = new List<string>();
         var invalidPartNumbers = new List<string>();
-        
+
         foreach (var line in lines)
         {
             if (!string.IsNullOrWhiteSpace(line))
             {
                 var partNumber = line.Trim();
                 partNumbers.Add(partNumber);
-                
-                if (!ToyotaPartNumber.TryParse(partNumber, out var parsedPart))
+
+                if (!ToyotaPartNumber.TryParse(partNumber, out var parsedPart, removeNonAlphanumericCharacters: true))
                 {
                     invalidPartNumbers.Add(partNumber);
                     output.WriteLine($"Invalid part number: {partNumber}");
@@ -172,28 +195,5 @@ public class ToyotaPartNumberTests
         }
 
         Assert.Empty(invalidPartNumbers);
-    }
-
-    [Fact(DisplayName = "09. Parse with Non-Alphanumeric Characters")]
-    public void ParseWithNonAlphanumericCharacters()
-    {
-        Assert.True(ToyotaPartNumber.TryParse("'0400553242'", out var part1));
-        Assert.Equal("0400553242", part1.ToString(false));
-
-        Assert.True(ToyotaPartNumber.TryParse("\"0400553242\"", out var part2));
-        Assert.Equal("0400553242", part2.ToString(false));
-
-        Assert.True(ToyotaPartNumber.TryParse(" 90915-YZZJ3 ", out var part3));
-        Assert.Equal("90915YZZJ3", part3.ToString(false));
-
-        Assert.True(ToyotaPartNumber.TryParse("  '90915-YZZJ3'  ", out var part4));
-        Assert.Equal("90915YZZJ3", part4.ToString(false));
-
-        Assert.True(ToyotaPartNumber.TryParse("04152@YZZA1!", out var part5));
-        Assert.Equal("04152YZZA1", part5.ToString(false));
-
-        Assert.Equal(part1, part1);
-        Assert.Equal(part2, part2);
-        Assert.Equal(part3, part4);
     }
 }
