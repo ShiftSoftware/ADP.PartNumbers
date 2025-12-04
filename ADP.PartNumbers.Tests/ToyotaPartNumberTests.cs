@@ -245,7 +245,7 @@ public class ToyotaPartNumberTests
             
             Assert.Equal(item.expectedNoHyphenOutput, part.ToString(false));
 
-            this.output.WriteLine($"| Part:      {item.providedPartString.PadRight(14)} |");
+            this.output.WriteLine($"| Input:     {item.providedPartString.PadRight(14)} |");
             this.output.WriteLine($"| Hyphen:    {part.ToString().PadRight(14)} |");
             this.output.WriteLine($"| No Hyphen: {part.ToString(false).PadRight(14)} |");
 
