@@ -89,9 +89,9 @@ public class ToyotaPartNumber
             return partNumber;
 
         if (string.IsNullOrEmpty(PartSuffix))
-            return $"{PartNumberCategory}-{VehicleUsageCode}";
+            return $"{PartNumberCategory}-{VehicleUsageCode}".ToUpperInvariant();
 
-        return $"{PartNumberCategory}-{VehicleUsageCode}-{PartSuffix}";
+        return $"{PartNumberCategory}-{VehicleUsageCode}-{PartSuffix}".ToUpperInvariant();
     }
 
     public override string ToString() => ToString(true);

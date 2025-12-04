@@ -197,4 +197,51 @@ public class ToyotaPartNumberTests
 
         Assert.Empty(invalidPartNumbers);
     }
+
+
+    [Fact(DisplayName = "09. ToString Formats")]
+    public void ToStringFormats()
+    {
+        var dataSet = new List<(
+            string providedPartString,
+            string epxectedOutput,
+            string expectedNoHyphenOutput
+        )>()
+        {
+            new ("12345ABCDE", "12345-ABCDE", "12345ABCDE"),
+            new ("12345abcde", "12345-ABCDE", "12345ABCDE"),
+            
+            new ("12345-ABCDE", "12345-ABCDE", "12345ABCDE"),
+            new ("12345-abcde", "12345-ABCDE", "12345ABCDE"),
+
+            new ("12345ABCDEXY", "12345-ABCDE-XY", "12345ABCDEXY"),
+            new ("12345abcdexy", "12345-ABCDE-XY", "12345ABCDEXY"),
+
+            new ("12345-ABCDE-XY", "12345-ABCDE-XY", "12345ABCDEXY"),
+            new ("12345-abcde-xy", "12345-ABCDE-XY", "12345ABCDEXY"),
+        };
+
+        foreach (var item in dataSet)
+        {
+            this.output.WriteLine("-----------------------------");
+
+            ToyotaPartNumber part;
+            bool partIsValid;
+
+            partIsValid = ToyotaPartNumber.TryParse(item.providedPartString, out part);
+            
+            Assert.True(partIsValid);
+            
+            Assert.Equal(item.epxectedOutput, part.ToString());
+            
+            Assert.Equal(item.expectedNoHyphenOutput, part.ToString(false));
+
+            this.output.WriteLine($"| Part:      {item.providedPartString.PadRight(14)} |");
+            this.output.WriteLine($"| Hyphen:    {part.ToString().PadRight(14)} |");
+            this.output.WriteLine($"| No Hyphen: {part.ToString(false).PadRight(14)} |");
+
+            this.output.WriteLine("-----------------------------");
+            this.output.WriteLine("");
+        }
+    }
 }
