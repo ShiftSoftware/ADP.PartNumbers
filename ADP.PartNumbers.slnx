@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Project Path="ADP.PartNumbers.Tests/ADP.PartNumbers.Tests.csproj" />
   <Project Path="ADP.PartNumbers/ADP.PartNumbers.csproj" />
 </Solution>
