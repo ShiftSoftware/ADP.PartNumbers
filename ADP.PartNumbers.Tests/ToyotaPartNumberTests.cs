@@ -253,4 +253,40 @@ public class ToyotaPartNumberTests
             this.output.WriteLine("");
         }
     }
+
+    [Fact(DisplayName = "10. Recover Spreadsheet-Trimmed Leading Zero")]
+    public void RecoverSpreadsheetTrimmedLeadingZero()
+    {
+        Assert.False(ToyotaPartNumber.TryParse("400299307", out _));
+
+        Assert.True(ToyotaPartNumber.TryParse(
+            "400299307",
+            out var recovered,
+            removeNonAlphanumericCharacters: false,
+            recoverMissingLeadingZero: true));
+
+        Assert.Equal("04002-99307", recovered.ToString());
+        Assert.Equal("0400299307", recovered.ToString(false));
+
+        Assert.True(ToyotaPartNumber.TryParse(
+            "0400299307",
+            out var alreadyValid,
+            removeNonAlphanumericCharacters: false,
+            recoverMissingLeadingZero: true));
+
+        Assert.Equal("0400299307", alreadyValid.ToString(false));
+    }
+
+    [Theory(DisplayName = "11. Leading-Zero Recovery Is Limited to Nine Numeric Characters")]
+    [InlineData("A00299307")]
+    [InlineData("40029930")]
+    [InlineData("04002993070")]
+    public void LeadingZeroRecoveryRemainsNarrow(string partNumber)
+    {
+        Assert.False(ToyotaPartNumber.TryParse(
+            partNumber,
+            out _,
+            removeNonAlphanumericCharacters: false,
+            recoverMissingLeadingZero: true));
+    }
 }

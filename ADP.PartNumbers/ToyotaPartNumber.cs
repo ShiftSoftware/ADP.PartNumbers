@@ -22,6 +22,18 @@ public class ToyotaPartNumber
     /// Tries to parse a Toyota Part Number. Returns true if successful, otherwise false.
     /// </summary>
     public static bool TryParse(string partNumber, out ToyotaPartNumber result, bool removeNonAlphanumericCharacters = false)
+        => TryParse(partNumber, out result, removeNonAlphanumericCharacters, recoverMissingLeadingZero: false);
+
+    /// <summary>
+    /// Tries to parse a Toyota Part Number. When <paramref name="recoverMissingLeadingZero"/> is enabled, an
+    /// otherwise invalid value containing exactly nine numeric characters is treated as a ten-character part
+    /// whose significant leading zero was removed by spreadsheet numeric-cell handling.
+    /// </summary>
+    public static bool TryParse(
+        string partNumber,
+        out ToyotaPartNumber result,
+        bool removeNonAlphanumericCharacters,
+        bool recoverMissingLeadingZero)
     {
         result = null;
 
@@ -33,7 +45,7 @@ public class ToyotaPartNumber
             return false;
 
         Span<char> buffer = stackalloc char[partNumber.Length];
-        Span<char> cleanedBuffer = stackalloc char[partNumber.Length];
+        Span<char> cleanedBuffer = stackalloc char[partNumber.Length + (recoverMissingLeadingZero ? 1 : 0)];
 
         int index = 0;
         var cleandedIndex = 0;
@@ -60,6 +72,29 @@ public class ToyotaPartNumber
 
         if (containsInvalidCharacters)
             return false;
+
+        if (recoverMissingLeadingZero && cleandedIndex == 9)
+        {
+            var containsOnlyDigits = true;
+
+            for (var i = 0; i < cleandedIndex; i++)
+            {
+                if (cleanedBuffer[i] < '0' || cleanedBuffer[i] > '9')
+                {
+                    containsOnlyDigits = false;
+                    break;
+                }
+            }
+
+            if (containsOnlyDigits)
+            {
+                for (var i = cleandedIndex; i > 0; i--)
+                    cleanedBuffer[i] = cleanedBuffer[i - 1];
+
+                cleanedBuffer[0] = '0';
+                cleandedIndex++;
+            }
+        }
 
         result = new ToyotaPartNumber(cleanedBuffer.Slice(0, cleandedIndex));
 

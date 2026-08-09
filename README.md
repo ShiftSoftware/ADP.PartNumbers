@@ -68,6 +68,24 @@ When `removeNonAlphanumericCharacters: true` is specified, invalid characters ar
 | `12345-ABCDE??` | `12345-ABCDE` | `12345ABCDE` |
 | `12345-ABCDE??` | `12345-ABCDE` | `12345ABCDE` |
 
+### Spreadsheet-Trimmed Leading Zeros
+
+Numeric spreadsheet cells can drop a significant leading zero from a Toyota part number. Set
+`recoverMissingLeadingZero: true` to recover only the narrow nine-digit, all-numeric shape:
+
+```csharp
+ToyotaPartNumber.TryParse(
+    "400299307",
+    out var part,
+    removeNonAlphanumericCharacters: false,
+    recoverMissingLeadingZero: true);
+
+Console.WriteLine(part.ToString(false)); // 0400299307
+```
+
+The option is disabled by default, does not alter valid ten- or twelve-character part numbers, and does not
+repair nine-character values containing letters.
+
 ## Usage
 
 ### Parsing
